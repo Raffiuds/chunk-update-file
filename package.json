@@ -1,0 +1,8 @@
+{
+  "name": "chunk-update-file",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/Raffiuds/chunk-update-file.git",
+  "author": "raffiuds <viniciosampaio@hotmail.com>",
+  "license": "MIT"
+}
