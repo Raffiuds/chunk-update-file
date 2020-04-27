@@ -19,6 +19,8 @@ async function chunks(file) {
     const qtd = Math.ceil(size / chunksize);
     const contentType = file.type;
 
+    console.log(qtd)
+
     var headers = new Headers()
     headers.append('Content-Type', contentType)
 
@@ -28,7 +30,6 @@ async function chunks(file) {
     })
 
     result = await response.json()
-    console.log(result)
     fileID = result.fileID
     UPLOAD_URL = `${HOST}/files/${fileID}/chunked-upload`
     UPLOAD_FINISH_URL = `${HOST}/files/${fileID}/finish-upload`
@@ -43,6 +44,7 @@ async function chunks(file) {
     }
 
     promises = []
+    cont = 0
     for (let i = 0; i < qtd; i++) {
 
         let start = i * chunksize;
@@ -56,12 +58,12 @@ async function chunks(file) {
             method: 'PUT',
             headers: headers,
             body: chunk
+        }).then(() => {
+            console.log((++cont / qtd) * 100)
         }))
 
     }
 
-    
-    console.log(promises)
     Promise.all(promises).then(() => {
         headers.delete("Content-Range")
         fetch(UPLOAD_FINISH_URL, {
@@ -69,7 +71,5 @@ async function chunks(file) {
             headers: headers
         })
     })
-
-
 
 }
