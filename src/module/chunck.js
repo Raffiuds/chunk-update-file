@@ -7,9 +7,22 @@ const chunk = () => {
     let _qtd;
     let _contentType;
     let _fileID;
-    let _progress;
 
-    const setHost = (host) =>  {_HOST = host};
+    let observers = []
+
+    const subscribe = (f) => {
+        observers.push(f);
+    }
+
+    const unsubscribe = (f) => {
+        observers = observers.filter(subscriber => subscriber !== f);
+    }
+
+    const notify = (data) => {
+        observers.forEach(observer => observer(data));
+    }    
+
+    const setHost = (host) =>  _HOST = host;
 
     const setChunkSize = (size) => _chunksize = size;
 
@@ -27,7 +40,7 @@ const chunk = () => {
         const request = await fetch(UPLOAD_INIT_URL, {
             method: 'POST',
             headers: headers
-        });
+        })
     
         const response = await request.json();
         _fileID = response.fileID
@@ -55,6 +68,7 @@ const chunk = () => {
         let promises = []
         for (let i = 0; i < _qtd; i++) {
 
+            let progress
             let start = i * _chunksize;
             let end = ((i + 1) * _chunksize);
 
@@ -67,8 +81,8 @@ const chunk = () => {
                 headers: headers,
                 body: ch
             }).then(() => {
-                _progress = (++cont / _qtd) * 100
-                console.log(_progress)
+                progress = (++cont / _qtd) * 100
+                notify(progress)
             }));
 
         }
@@ -90,7 +104,9 @@ const chunk = () => {
         setChunkSize,
         setHost,
         initUpload,
-        upload
+        upload,
+        subscribe,
+        unsubscribe
     }
 }
 
