@@ -1,4 +1,4 @@
-const chunk = () => {
+const chunk = (system, salon) => {
 
     let _HOST = 'http://localhost:5000';
 
@@ -81,7 +81,7 @@ const chunk = () => {
                 headers: headers,
                 body: ch
             }).then(() => {
-                progress = (++cont / _qtd) * 100
+                progress = (++cont / _qtd)
                 notify(progress)
             }));
 
@@ -92,6 +92,8 @@ const chunk = () => {
 
             let headers = new Headers();
             headers.append('Content-Type', _contentType);
+            headers.append('Content-Salon', salon);
+            headers.append('Content-System', system);
     
             fetch(UPLOAD_FINISH_URL, {
                 method: 'PUT',
