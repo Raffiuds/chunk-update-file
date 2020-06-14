@@ -87,19 +87,27 @@ const chunk = (system, salon) => {
 
         }
 
-        Promise.all(promises).then(() =>{
-            let UPLOAD_FINISH_URL = `${_HOST}/files/${_fileID}/finish-upload`
+        await Promise.all(promises)
 
-            let headers = new Headers();
-            headers.append('Content-Type', _contentType);
-            headers.append('Content-Salon', salon);
-            headers.append('Content-System', system);
+        let UPLOAD_FINISH_URL = `${_HOST}/files/${_fileID}/finish-upload`
+
+        headers = new Headers();
+        headers.append('Content-Type', _contentType);
+        headers.append('Content-Salon', salon);
+        headers.append('Content-System', system);
     
-            fetch(UPLOAD_FINISH_URL, {
-                method: 'PUT',
-                headers: headers
-            })
+        const response = await fetch(UPLOAD_FINISH_URL, {
+            method: 'PUT',
+            headers: headers
         })
+
+        if (response.status === 202) {
+            return
+        } else {
+            const body = await response.json()
+            return body
+        }
+
     }
 
     return {

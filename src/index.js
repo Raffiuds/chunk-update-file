@@ -7,10 +7,12 @@ const print = (data) => {
 async function previewFile() {
     const file = document.querySelector('input[type=file]').files[0];
     
-    const c = chunk('AZ', '1337')
+    const c = chunk('Planilha', '1337')
     c.subscribe(print)
     await c.initUpload(file)
-    await c.upload()
+    const body = await c.upload()
+
+    console.log(body)
 
 }
 
