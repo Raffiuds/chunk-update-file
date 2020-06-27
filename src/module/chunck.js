@@ -20,18 +20,28 @@ const chunk = (system, salon) => {
 
     const notify = (data) => {
         observers.forEach(observer => observer(data));
-    }    
+    }
 
-    const setHost = (host) =>  _HOST = host;
+    const setHost = (host) => _HOST = host;
 
     const setChunkSize = (size) => _chunksize = size;
 
-    const initUpload = async (file) => {
+    const validationType = (type, name) => {
+        if (type === "") {
+            if (name.slice((name.lastIndexOf(".") - 1 >>> 0) + 2) === "csv") {
+                return "text/csv"
+            }
+        } else {
+            return type
+        }
+    }
+
+    const initUpload = async(file) => {
 
         let UPLOAD_INIT_URL = `${_HOST}/files`
 
         _file = file
-        _contentType = _file.type;
+        _contentType = validationType(_file.type, _file.name);
         _qtd = Math.ceil(_file.size / _chunksize);
         let headers = new Headers();
 
@@ -41,15 +51,15 @@ const chunk = (system, salon) => {
             method: 'POST',
             headers: headers
         })
-    
+
         const response = await request.json();
         _fileID = response.fileID
-    
+
     }
 
     const split = (start, end, contentType) => {
         let rangeHeader = `bytes ${start}-${end}`;
-        
+
         let ch = _file.slice(start, end, contentType);
         return {
             rangeHeader,
@@ -57,7 +67,7 @@ const chunk = (system, salon) => {
         }
     }
 
-    const upload = async () => {
+    const upload = async() => {
 
         let UPLOAD_URL = `${_HOST}/files/${_fileID}/chunked-upload`
 
@@ -72,8 +82,8 @@ const chunk = (system, salon) => {
             let start = i * _chunksize;
             let end = ((i + 1) * _chunksize);
 
-            const {rangeHeader, ch } = split(start, end, _contentType)
-            
+            const { rangeHeader, ch } = split(start, end, _contentType)
+
             headers.set("Content-Range", rangeHeader);
 
             promises.push(fetch(UPLOAD_URL, {
@@ -92,10 +102,11 @@ const chunk = (system, salon) => {
         let UPLOAD_FINISH_URL = `${_HOST}/files/${_fileID}/finish-upload`
 
         headers = new Headers();
+        console.log(_contentType)
         headers.append('Content-Type', _contentType);
         headers.append('Content-Salon', salon);
         headers.append('Content-System', system);
-    
+
         const response = await fetch(UPLOAD_FINISH_URL, {
             method: 'PUT',
             headers: headers
